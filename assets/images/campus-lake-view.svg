@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="skyLight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#bae6fd" />
+      <stop offset="60%" stop-color="#e0f2fe" />
+      <stop offset="100%" stop-color="#f0fdf4" />
+    </linearGradient>
+    <linearGradient id="lakeWaterLight" x1="0%" y1="0%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="50%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0ea5e9" />
+    </linearGradient>
+  </defs>
+
+  <!-- Sky and Campus Landscape -->
+  <rect width="900" height="300" rx="16" fill="url(#skyLight)" stroke="#cbd5e1" stroke-width="1.5" />
+  
+  <!-- Campus Lake Curved Shape -->
+  <path d="M 0 160 Q 220 120 450 180 T 900 150 L 900 300 L 0 300 Z" fill="url(#lakeWaterLight)" opacity="0.85" />
+  <path d="M 0 200 Q 250 160 500 210 T 900 190 L 900 300 L 0 300 Z" fill="#0284c7" opacity="0.9" />
+
+  <!-- Shoreline Greenery & campus silhouettes -->
+  <path d="M 40 160 L 60 130 L 80 160 Z" fill="#10b981" />
+  <path d="M 70 160 L 90 125 L 110 160 Z" fill="#059669" />
+  <path d="M 120 155 L 140 120 L 160 155 Z" fill="#10b981" />
+  
+  <!-- Campus Library Tower Silhouette in background -->
+  <rect x="360" y="70" width="70" height="90" fill="#64748b" opacity="0.8" rx="4" />
+  <polygon points="360,70 395,30 430,70" fill="#475569" />
+  <rect x="385" y="45" width="20" height="20" fill="#e0f2fe" opacity="0.9" />
+
+  <!-- Floating Monitoring Buoy 1 (Station 1) -->
+  <g transform="translate(240, 190)">
+    <!-- Ripples -->
+    <ellipse cx="25" cy="40" rx="45" ry="12" fill="none" stroke="#bae6fd" stroke-width="2" opacity="0.8">
+      <animate attributeName="rx" values="30;55;30" dur="3s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0.8;0.2;0.8" dur="3s" repeatCount="indefinite" />
+    </ellipse>
+    <!-- Buoy base -->
+    <path d="M 5 35 Q 25 50 45 35 L 35 15 L 15 15 Z" fill="#f59e0b" stroke="#b45309" stroke-width="1.5" />
+    <!-- Mast & Solar Panel -->
+    <line x1="25" y1="15" x2="25" y2="-15" stroke="#475569" stroke-width="3" />
+    <rect x="10" y="-18" width="30" height="12" rx="2" fill="#1e3a8a" stroke="#60a5fa" stroke-width="1" />
+    <!-- Flashing beacon -->
+    <circle cx="25" cy="-22" r="5" fill="#10b981">
+      <animate attributeName="fill" values="#10b981;#34d399;#10b981" dur="1.5s" repeatCount="indefinite" />
+    </circle>
+    <!-- Tag -->
+    <rect x="-25" y="55" width="100" height="22" rx="11" fill="#ffffff" stroke="#0284c7" stroke-width="1.2" />
+    <text x="25" y="70" font-family="system-ui" font-size="11" font-weight="bold" fill="#0369a1" text-anchor="middle">#1 未名湖观测站</text>
+  </g>
+
+  <!-- Floating Monitoring Buoy 2 (Station 2) -->
+  <g transform="translate(620, 205)">
+    <ellipse cx="25" cy="40" rx="40" ry="10" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.7" />
+    <path d="M 5 35 Q 25 50 45 35 L 35 15 L 15 15 Z" fill="#0284c7" stroke="#0369a1" stroke-width="1.5" />
+    <line x1="25" y1="15" x2="25" y2="-15" stroke="#475569" stroke-width="3" />
+    <rect x="10" y="-18" width="30" height="12" rx="2" fill="#1e3a8a" stroke="#60a5fa" stroke-width="1" />
+    <circle cx="25" cy="-22" r="5" fill="#38bdf8" />
+    <rect x="-20" y="55" width="90" height="22" rx="11" fill="#ffffff" stroke="#059669" stroke-width="1.2" />
+    <text x="25" y="70" font-family="system-ui" font-size="11" font-weight="bold" fill="#047857" text-anchor="middle">#2 镜湖湿地站</text>
+  </g>
+
+  <!-- Overlay Water Quality Status Info Badge -->
+  <rect x="30" y="24" width="290" height="58" rx="10" fill="#ffffff" fill-opacity="0.92" stroke="#bae6fd" stroke-width="1.2" />
+  <text x="45" y="46" font-family="system-ui" font-size="13" font-weight="bold" fill="#0f172a">校园水体数字化全域孪生系统</text>
+  <text x="45" y="66" font-family="system-ui" font-size="11" fill="#64748b">水域面积 18.5万㎡ · 4大水质原位监测站巡检中</text>
+</svg>

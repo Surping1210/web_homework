@@ -1462,6 +1462,23 @@ function bindEvents() {
       alert("预置系统写死用户账号：\n\n1. 超级管理员：\n   账号: admin  密码: 123456\n   权限: 全部控制、阈值配置、数据导出与清空\n\n2. 校园研学访客：\n   账号: guest  密码: 123456\n   权限: 仅查看实时数据看板与趋势图表");
     });
   }
+
+  // 课程作业压缩包直链复制
+  const copyZipBtn = $("#btn-copy-zip-link");
+  if (copyZipBtn) {
+    copyZipBtn.addEventListener("click", () => {
+      const fullUrl = `${window.location.origin}/campus-water-project.zip`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(fullUrl).then(() => {
+          showNotification("已复制作业包下载直链！可在浏览器新标签页粘贴打开下载");
+        }).catch(() => {
+          showNotification(`下载直链: ${fullUrl}`);
+        });
+      } else {
+        showNotification(`下载直链: ${fullUrl}`);
+      }
+    });
+  }
 }
 
 // ================= 10. 辅助工具函数 =================
