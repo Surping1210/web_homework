@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>校园水文水质智能监测系统 - 物联网综合管控云平台</title>
+    <meta name="description" content="基于物联网传感器与自动化控制的智慧校园水文水质实时监测与预警分析平台，支持多监测站数据看板、水质趋势图表分析、双模智能设备联动控制、历史记录追溯及超限异常报警。" />
+    <meta property="og:title" content="校园水文水质智能监测系统 - 物联网综合管控云平台" />
+    <meta property="og:description" content="智慧校园水文水质实时监测系统，具备实时传感数据采集、Canvas动态折线图分析、双模智能设备联动控制、超限告警及历史数据追溯。" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- 1. 外部样式表 (External Stylesheet) -->
+    <link rel="stylesheet" href="/src/style.css" />
+
+    <!-- 2. 内嵌样式表 (Embedded Stylesheet) -->
+    <style>
+      /* 内嵌样式表：定义特色动画、仪表盘发光与微调样式 (明亮清新风格) */
+      @keyframes radarSweep {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .radar-scanner {
+        position: relative;
+        width: 18px;
+        height: 18px;
+        border: 1.5px solid #0284c7;
+        border-radius: 50%;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      .radar-scanner::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-top: 2px solid #0369a1;
+        border-radius: 50%;
+        animation: radarSweep 2s linear infinite;
+      }
+
+      /* 报警闪烁呼吸灯 */
+      @keyframes alertGlow {
+        0%, 100% { box-shadow: 0 0 8px rgba(239, 68, 68, 0.3); }
+        50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.7); }
+      }
+
+      .alarm-active {
+        animation: alertGlow 1.2s infinite ease-in-out;
+      }
+
+      /* 自定义滚动条美化 */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+    </style>
+  </head>
+  <body id="section-top">
+    <!-- 固定定位顶部导航栏 (Fixed Navigation Bar - 极致单行紧凑美化) -->
+    <nav id="main-nav">
+      <div class="nav-brand">
+        <span class="radar-scanner"></span>
+        <span class="nav-brand-title">校园水文水质监测</span>
+      </div>
+
+      <!-- 超链接锚点跳转 (Hyperlinks / Anchors) -->
+      <ul class="nav-links">
+        <li><a href="#section-realtime">实时看板</a></li>
+        <li><a href="#section-chart">趋势图表</a></li>
+        <li><a href="#section-devices">设备控制</a></li>
+        <li><a href="#section-threshold">阈值配置</a></li>
+        <li><a href="#section-history">历史记录</a></li>
+        <li><a href="#section-gallery">站点实景</a></li>
+        <li><a href="#section-topology">拓扑与规程</a></li>
+      </ul>
+
+      <div class="nav-status">
+        <div class="status-dot-wrapper">
+          <span class="status-ping" id="status-ping-indicator"></span>
+          <span class="status-dot" id="status-dot-indicator"></span>
+        </div>
+        <span id="nav-system-status" style="font-size: 12px; color: #059669; font-weight: 600;">
+          在线运行
+        </span>
+        <button id="toggle-audio-btn" class="btn btn-sm btn-secondary" style="font-size: 11px; padding: 3px 8px; white-space: nowrap;">
+          告警音效: 开
+        </button>
+
+        <!-- 用户登录状态显示区 -->
+        <div id="user-auth-area">
+          <div class="user-avatar-tag" id="current-user-info">
+            <span id="user-display-name">访客</span>
+            <span id="user-role-badge" class="badge badge-info" style="font-size: 10px; padding: 2px 6px;">研学</span>
+          </div>
+          <button id="auth-action-btn" class="btn btn-sm btn-primary" style="font-size: 11px; padding: 3px 10px; white-space: nowrap;">
+            登录
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主体容器 -->
+    <main class="app-container">
+      <!-- 页面主标题区 (h1) -->
+      <header id="system-header">
+        <div class="header-badge">
+          <span>● 物联网实时遥测专网</span>
+          <span style="margin: 0 4px;">|</span>
+          <span id="current-time-text">加载时钟...</span>
+        </div>
+        <h1>校园水文水质智能监测系统</h1>
+        <p style="margin-top: 8px; max-width: 860px; font-size: 13px; color: #475569; line-height: 1.6;">
+          本平台采用原位数字传感器与边缘计算网关，实时采集校园湖泊与景观水系的水温、pH酸碱度、溶解氧、浊度、水位与电导率等多维水文理化指标，依托自适应闭环算法实现微孔曝气、循环过滤、药剂中和与生态闸门双模启停联控。
+        </p>
+
+        <!-- 站点切换与操作工具栏 -->
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; padding-top: 14px; border-top: 1px solid #bae6fd;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <label for="station-select-top" style="color: #334155; font-size: 13px; font-weight: 600;">当前监测站点：</label>
+            <select id="station-select-top" style="width: 220px; height: 36px;">
+              <option value="1">1号站 · 未名湖中央生态站</option>
+              <option value="2">2号站 · 镜湖湿地涵养站</option>
+              <option value="3">3号站 · 临溪明渠水文站</option>
+              <option value="4">4号站 · 观赏景观蓄水池</option>
+            </select>
+          </div>
+
+          <!-- 模拟快捷测试按钮组 (用于评审演示) -->
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 12px; color: #64748b; font-weight: 600;">模拟工况测试：</span>
+            <button id="sim-storm-btn" class="btn btn-sm btn-secondary" title="模拟暴雨导致水位剧增">🌧️ 暴雨汛期</button>
+            <button id="sim-pollute-btn" class="btn btn-sm btn-danger" title="模拟突发低氧与高浊水质恶化">☣️ 突发污染</button>
+            <button id="sim-recover-btn" class="btn btn-sm btn-success" title="一键恢复优良生态水质">🌿 恢复水质</button>
+            <button id="refresh-manual-btn" class="btn btn-sm btn-primary">🔄 刷新遥测</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- 实时物联网传感器遥测看板 (h2 ~ h4) -->
+      <section id="section-realtime" class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2>📡 实时物联网传感器遥测看板</h2>
+            <h3>📊 当前站点水文理化关键指标与健康评价</h3>
+          </div>
+          <div class="card-actions">
+            <span id="station-grade-badge" class="badge badge-normal">🌿 国标 II 类水质 (优)</span>
+            <button id="auto-refresh-toggle" class="btn btn-sm btn-secondary">⏸ 暂停刷新</button>
+          </div>
+        </div>
+
+        <!-- <h4>分组标题：理化指标监测组 -->
+        <h4 style="margin-bottom: 8px;">🔬 水质理化与生化指标 (实时刷新中)</h4>
+        <div class="sensor-grid">
+          <!-- 水温 -->
+          <div class="sensor-card" id="card-temp" data-sensor="temp" data-status="normal">
+            <div class="sensor-header">
+              <span class="sensor-name">🌡️ 水体温度 (Temp)</span>
+              <span class="sensor-icon">🌡️</span>
+            </div>
+            <div class="sensor-value-row">
+              <span class="sensor-value" id="val-temp">22.4</span>
+              <span class="sensor-unit">℃</span>
+            </div>
+            <div class="sensor-gauge-bg">
+              <div class="sensor-gauge-bar" id="gauge-temp" style="width: 55%;"></div>
+            </div>
+            <div class="sensor-footer">
+              <span>基准安全域: <span id="thresh-display-temp">10.0 ~ 30.0</span>℃</span>
+              <span class="badge badge-normal" id="status-temp">正常</span>
+            </div>
+          </div>
+
+          <!-- pH酸碱度 -->
+          <div class="sensor-card" id="card-ph" data-sensor="ph" data-status="normal">
+            <div class="sensor-header">
+              <span class="sensor-name">🧪 酸碱度 (pH值)</span>
+              <span class="sensor-icon">🧪</span>
+            </div>
+            <div class="sensor-value-row">
+              <span class="sensor-value" id="val-ph">7.35</span>
+              <span class="sensor-unit">pH</span>
+            </div>
+            <div class="sensor-gauge-bg">
+              <div class="sensor-gauge-bar" id="gauge-ph" style="width: 52%;"></div>
+            </div>
+            <div class="sensor-footer">
+              <span>基准安全域: <span id="thresh-display-ph">6.50 ~ 8.50</span></span>
+              <span class="badge badge-normal" id="status-ph">正常</span>
+            </div>
+          </div>
+
+          <!-- 溶解氧 DO -->
+          <div class="sensor-card" id="card-do" data-sensor="do" data-status="normal">
+            <div class="sensor-header">
+              <span class="sensor-name">🫧 溶解氧 (DO)</span>
+              <span class="sensor-icon">🫧</span>
+            </div>
+            <div class="sensor-value-row">
+              <span class="sensor-value" id="val-do">6.8</span>
+              <span class="sensor-unit">mg/L</span>
+            </div>
+            <div class="sensor-gauge-bg">
+              <div class="sensor-gauge-bar" id="gauge-do" style="width: 68%;"></div>
+            </div>
+            <div class="sensor-footer">
+              <span>最低保护阈值: ≥ <span id="thresh-display-do">5.0</span> mg/L</span>
+              <span class="badge badge-normal" id="status-do">优良</span>
+            </div>
+          </div>
+
+          <!-- 浊度 NTU -->
+          <div class="sensor-card" id="card-turb" data-sensor="turb" data-status="normal">
+            <div class="sensor-header">
+              <span class="sensor-name">💧 浊度 (Turbidity)</span>
+              <span class="sensor-icon">💧</span>
+            </div>
+            <div class="sensor-value-row">
+              <span class="sensor-value" id="val-turb">6.5</span>
+              <span class="sensor-unit">NTU</span>
+            </div>
+            <div class="sensor-gauge-bg">
+              <div class="sensor-gauge-bar" id="gauge-turb" style="width: 25%;"></div>
+            </div>
+            <div class="sensor-footer">
+              <span>清澈警戒上限: ≤ <span id="thresh-display-turb">15.0</span> NTU</span>
+              <span class="badge badge-normal" id="status-turb">清澈</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- <h4>分组标题：水文动力学与物化参数组 -->
+        <h4 style="margin-top: 18px; margin-bottom: 8px;">🌊 水文动力学与物化传输指标</h4>
+        <div class="sensor-grid">
+          <!-- 水位 -->
+          <div class="sensor-card" id="card-level" data-sensor="level" data-status="normal">
+            <div class="sensor-header">
+              <span class="sensor-name">📏 水文监测水位 (Level)</span>
+              <span class="sensor-icon">📏</span>
+            </div>
+            <div class="sensor-value-row">
+              <span class="sensor-value" id="val-level">1.68</span>
+              <span class="sensor-unit">m</span>
+            </div>
+            <div class="sensor-gauge-bg">
+              <div class="sensor-gauge-bar" id="gauge-level" style="width: 56%;"></div>
+            </div>
+            <div class="sensor-footer">
+              <span>警戒水位上限: ≤ <span id="thresh-display-level">2.50</span> m</span>
+              <span class="badge badge-normal" id="status-level">安全</span>
+            </div>
+          </div>
+
+          <!-- 电导率 EC -->
+          <div class="sensor-card" id="card-ec" data-sensor="ec" data-status="normal">
+            <div class="sensor-header">
+              <span class="sensor-name">⚡ 电导率 (EC/离子强度)</span>
+              <span class="sensor-icon">⚡</span>
+            </div>
+            <div class="sensor-value-row">
+              <span class="sensor-value" id="val-ec">412</span>
+              <span class="sensor-unit">μS/cm</span>
+            </div>
+            <div class="sensor-gauge-bg">
+              <div class="sensor-gauge-bar" id="gauge-ec" style="width: 41%;"></div>
+            </div>
+            <div class="sensor-footer">
+              <span>正常基准区间: ≤ 800 μS/cm</span>
+              <span class="badge badge-normal" id="status-ec">洁净</span>
+            </div>
+          </div>
+
+          <!-- 水流流速 -->
+          <div class="sensor-card">
+            <div class="sensor-header">
+              <span class="sensor-name">⛵ 渠水表面流速 (Flow)</span>
+              <span class="sensor-icon">⛵</span>
+            </div>
+            <div class="sensor-value-row">
+              <span class="sensor-value" id="val-flow">0.42</span>
+              <span class="sensor-unit">m/s</span>
+            </div>
+            <div class="sensor-gauge-bg">
+              <div class="sensor-gauge-bar" style="width: 35%;"></div>
+            </div>
+            <div class="sensor-footer">
+              <span>生态缓流水体</span>
+              <span class="badge badge-info">微流动</span>
+            </div>
+          </div>
+
+          <!-- 空气温湿度与气压 (环境气象关联) -->
+          <div class="sensor-card">
+            <div class="sensor-header">
+              <span class="sensor-name">🌤️ 水面环境气象站</span>
+              <span class="sensor-icon">🌤️</span>
+            </div>
+            <div class="sensor-value-row">
+              <span class="sensor-value" id="val-humidity" style="font-size: 26px;">65% / 24℃</span>
+            </div>
+            <div class="sensor-gauge-bg">
+              <div class="sensor-gauge-bar" style="width: 65%;"></div>
+            </div>
+            <div class="sensor-footer">
+              <span>气压: 101.3 kPa</span>
+              <span class="badge badge-info">微风 2级</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- <h5>级标题：传感器通讯与标定周期 -->
+        <h5 style="margin-top: 14px; color: #64748b;">
+          📡 传感器校准周期与规范：荧光溶解氧传感器每90天标定零点与斜率；玻璃复合pH计每30天两点校正；LoRa网关无线心跳间隔2秒。
+        </h5>
+      </section>
+
+      <!-- 水文水质动态可视化图表 (Canvas Native Drawing) -->
+      <section id="section-chart" class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2>水文水质动态可视化分析图表</h2>
+            <h3>原生 HTML5 Canvas 实时渲染动态趋势折线 (多参数对比分析)</h3>
+          </div>
+          <div class="card-actions">
+            <label style="font-size: 12px; color: #475569; display: flex; align-items: center; gap: 6px;">
+              选择对比参数：
+              <select id="chart-metric-select" style="width: 170px; height: 32px; font-size: 12px;">
+                <option value="all">综合全参数叠加</option>
+                <option value="do">溶解氧 (DO mg/L)</option>
+                <option value="turb">浊度 (Turbidity NTU)</option>
+                <option value="temp">水温 (Temp ℃)</option>
+                <option value="ph">酸碱度 (pH)</option>
+                <option value="level">监测水位 (Level m)</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <!-- 图例说明与实时画布 -->
+        <div style="display: flex; gap: 16px; margin-bottom: 10px; font-size: 12px;">
+          <span style="color: #0284c7; font-weight: 600; display: flex; align-items: center; gap: 4px;">● 溶解氧 (DO)</span>
+          <span style="color: #d97706; font-weight: 600; display: flex; align-items: center; gap: 4px;">● 浊度 (NTU)</span>
+          <span style="color: #059669; font-weight: 600; display: flex; align-items: center; gap: 4px;">● 水体温度 (℃)</span>
+          <span style="color: #7c3aed; font-weight: 600; display: flex; align-items: center; gap: 4px;">● 监测水位 (m)</span>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="waterChart" width="1280" height="260"></canvas>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 12px; color: #64748b;">
+          <span>← 历史采样点序列 (最近 25 次采样周期，每2秒连续推演)</span>
+          <span>采用高精度双缓冲抗锯齿绘制 · 实时动态极值自适应标定 →</span>
+        </div>
+      </section>
+
+      <!-- 设备联动智能控制中心 (手动 + 自动双模式) -->
+      <section id="section-devices" class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2>⚙️ 智能水务治理设备联动控制中心</h2>
+            <h3>手动启闭与智能阈值自动闭环调控 (双模式支持)</h3>
+          </div>
+          <div class="card-actions">
+            <span style="font-size: 13px; color: #334155; font-weight: 600;">控制模式：</span>
+            <span id="current-mode-badge" class="badge badge-normal" style="font-size: 12px;">
+              🤖 自动阈值联动模式
+            </span>
+            <button id="toggle-global-mode-btn" class="btn btn-sm btn-secondary">
+              切换为手动模式
+            </button>
+          </div>
+        </div>
+
+        <!-- <h4>分组标题：治理设备状态与控制卡片 -->
+        <h4>⚙️ 智能水质治理与水动力学执行装备清单 (Pump / Filter / Dose / Gate)</h4>
+        <p style="font-size: 12px; margin-bottom: 14px;">
+          在<strong>手动模式</strong>下，管理人员可通过界面按钮强制开停设备；在<strong>自动模式</strong>下，系统内置逻辑引擎根据传感器数据与阈值自动判决启停，防止水体缺氧泛塘与暴雨倒灌。
+        </p>
+
+        <div class="device-grid">
+          <!-- 设备 1: 增氧微孔曝气机 (Pump) -->
+          <div class="device-card" id="dev-card-aerator" data-device="aerator" data-active="false">
+            <div class="device-header">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="device-icon-box">
+                  <span style="font-size: 22px;">🫧</span>
+                </div>
+                <div class="device-info">
+                  <span class="device-name">🫧 1号 增氧微孔曝气泵 (Pump)</span>
+                  <span class="device-desc">水域增氧 · 联动溶解氧(DO)</span>
+                </div>
+              </div>
+              <span class="badge badge-info" id="dev-status-aerator">⏸ 待机停机</span>
+            </div>
+            <div class="device-meta">
+              <span>额定功率: 1.5 kW</span>
+              <span>累计运行时长: <span id="runtime-aerator">12.4</span> h</span>
+            </div>
+            <div class="device-actions">
+              <span style="font-size: 11px; color: #64748b;">触发逻辑: DO &lt; 5.0 mg/L 自动启动</span>
+              <button class="btn btn-sm btn-primary dev-toggle-btn" data-target="aerator">
+                手动启动
+              </button>
+            </div>
+          </div>
+
+          <!-- 设备 2: 生态循环砂滤水泵 (Filter) -->
+          <div class="device-card" id="dev-card-filter" data-device="filter" data-active="false">
+            <div class="device-header">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="device-icon-box">
+                  <span style="font-size: 22px;">🌀</span>
+                </div>
+                <div class="device-info">
+                  <span class="device-name">🌀 2号 生态循环砂滤机 (Filter)</span>
+                  <span class="device-desc">水体净化 · 联动浊度(Turb)</span>
+                </div>
+              </div>
+              <span class="badge badge-info" id="dev-status-filter">⏸ 待机停机</span>
+            </div>
+            <div class="device-meta">
+              <span>循环流量: 45 m³/h</span>
+              <span>累计运行时长: <span id="runtime-filter">8.1</span> h</span>
+            </div>
+            <div class="device-actions">
+              <span style="font-size: 11px; color: #64748b;">触发逻辑: 浊度 &gt; 15.0 NTU 自动启动</span>
+              <button class="btn btn-sm btn-primary dev-toggle-btn" data-target="filter">
+                手动启动
+              </button>
+            </div>
+          </div>
+
+          <!-- 设备 3: 中和药剂自动投加泵 (Dose) -->
+          <div class="device-card" id="dev-card-dosing" data-device="dosing" data-active="false">
+            <div class="device-header">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="device-icon-box">
+                  <span style="font-size: 22px;">🧪</span>
+                </div>
+                <div class="device-info">
+                  <span class="device-name">🧪 3号 生态酸碱调理投药机 (Dose)</span>
+                  <span class="device-desc">水质调理 · 联动pH酸碱度</span>
+                </div>
+              </div>
+              <span class="badge badge-info" id="dev-status-dosing">⏸ 待机停机</span>
+            </div>
+            <div class="device-meta">
+              <span>储药仓余量: 82%</span>
+              <span>累计运行时长: <span id="runtime-dosing">3.6</span> h</span>
+            </div>
+            <div class="device-actions">
+              <span style="font-size: 11px; color: #64748b;">触发逻辑: pH &lt; 6.5 或 &gt; 8.5 启动</span>
+              <button class="btn btn-sm btn-primary dev-toggle-btn" data-target="dosing">
+                手动启动
+              </button>
+            </div>
+          </div>
+
+          <!-- 设备 4: 智能排涝防汛升降闸门 (Gate) -->
+          <div class="device-card" id="dev-card-gate" data-device="gate" data-active="false">
+            <div class="device-header">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="device-icon-box">
+                  <span style="font-size: 22px;">⛩️</span>
+                </div>
+                <div class="device-info">
+                  <span class="device-name">⛩️ 4号 智能防汛液压升降闸 (Gate)</span>
+                  <span class="device-desc">水位调蓄 · 联动水位(Level)</span>
+                </div>
+              </div>
+              <span class="badge badge-info" id="dev-status-gate">⛩️ 闸门常闭</span>
+            </div>
+            <div class="device-meta">
+              <span>当前开度: <span id="gate-openness">0%</span></span>
+              <span>调蓄库容: 3200 m³</span>
+            </div>
+            <div class="device-actions">
+              <span style="font-size: 11px; color: #64748b;">触发逻辑: 水位 &gt; 2.50 m 自动开闸泄洪</span>
+              <button class="btn btn-sm btn-primary dev-toggle-btn" data-target="gate">
+                开闸泄洪
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 监测指标安全阈值设定 (HTML form表单规范要求) -->
+      <section id="section-threshold" class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2>监测指标安全阈值设定与表单配置</h2>
+            <h3>按标准自定义录入指标警戒线 (自动控制与超限告警判决依据)</h3>
+          </div>
+          <div class="card-actions">
+            <!-- 功能跳转链接示例 -->
+            <a href="https://www.mee.gov.cn/ywgz/fgbz/bz/bzwb/shjbh/shjzlbz/200206/W020061027509896672057.pdf" target="_blank" rel="noopener noreferrer" style="font-size: 12px;">
+              查看国家地表水环境质量标准(GB 3838-2002)
+            </a>
+          </div>
+        </div>
+
+        <!-- HTML Form表单完整展示：文本、密码、数字、单选、复选、下拉、提交、重置全部具备 -->
+        <form id="threshold-config-form" method="post" action="javascript:void(0);">
+          <div class="form-grid">
+            <!-- 文本输入框 (Text Input) -->
+            <div class="form-group">
+              <label for="admin-account">
+                管理员操作账号 <span style="color: #ef4444;">*</span>
+              </label>
+              <input type="text" id="admin-account" name="adminAccount" placeholder="请输入管理员账号" value="admin" required />
+            </div>
+
+            <!-- 密码输入框 (Password Input) -->
+            <div class="form-group">
+              <label for="admin-password">
+                管理权限校验密码 <span style="color: #ef4444;">*</span> (提示: 默认密码 123456)
+              </label>
+              <input type="password" id="admin-password" name="adminPassword" placeholder="输入密码验证配置权限" required />
+            </div>
+
+            <!-- 下拉菜单 (Select Dropdown) -->
+            <div class="form-group">
+              <label for="form-water-standard">
+                水质评估执行基准体系
+              </label>
+              <select id="form-water-standard" name="waterStandard">
+                <option value="GB3838_III">GB 3838-2002 地表水 III 类基准 (景观生活用水)</option>
+                <option value="GB3838_II">GB 3838-2002 地表水 II 类基准 (一级保护区)</option>
+                <option value="GB3838_IV">GB 3838-2002 地表水 IV 类基准 (一般工业娱乐用水)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 数字输入框群组 (Number Inputs) -->
+          <h4 style="margin: 12px 0 8px 0; color: #0284c7;">水质理化指标阈值范围设定</h4>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="input-temp-min">水温下限 (℃)</label>
+              <input type="number" id="input-temp-min" name="tempMin" step="0.5" min="0" max="40" value="10.0" required />
+            </div>
+
+            <div class="form-group">
+              <label for="input-temp-max">水温上限 (℃)</label>
+              <input type="number" id="input-temp-max" name="tempMax" step="0.5" min="0" max="45" value="30.0" required />
+            </div>
+
+            <div class="form-group">
+              <label for="input-ph-min">pH 酸碱度下限 (偏酸报警)</label>
+              <input type="number" id="input-ph-min" name="phMin" step="0.1" min="0" max="14" value="6.5" required />
+            </div>
+
+            <div class="form-group">
+              <label for="input-ph-max">pH 酸碱度上限 (偏碱报警)</label>
+              <input type="number" id="input-ph-max" name="phMax" step="0.1" min="0" max="14" value="8.5" required />
+            </div>
+
+            <div class="form-group">
+              <label for="input-do-min">溶解氧最低保护阈值 (DO mg/L)</label>
+              <input type="number" id="input-do-min" name="doMin" step="0.2" min="1" max="15" value="5.0" required />
+            </div>
+
+            <div class="form-group">
+              <label for="input-turb-max">浊度警戒上限 (Turbidity NTU)</label>
+              <input type="number" id="input-turb-max" name="turbMax" step="1" min="1" max="100" value="15.0" required />
+            </div>
+
+            <div class="form-group">
+              <label for="input-level-max">水文水位防汛预警上限 (m)</label>
+              <input type="number" id="input-level-max" name="levelMax" step="0.05" min="0.5" max="5.0" value="2.50" required />
+            </div>
+          </div>
+
+          <!-- 单选按钮与复选框 (Radio & Checkbox) -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 16px 0; padding: 14px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <!-- 单选按钮 (Radio Buttons) -->
+            <div>
+              <label style="display: block; margin-bottom: 8px; font-weight: 600;">控制执行工作模式 (单选)：</label>
+              <div class="radio-group">
+                <label class="radio-item">
+                  <input type="radio" name="formControlMode" value="auto" checked />
+                  <span>自动模式 (阈值自适应联动闭环)</span>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" name="formControlMode" value="manual" />
+                  <span>手动模式 (人工按需遥控设备)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 多选复选框 (Checkbox) -->
+            <div>
+              <label style="display: block; margin-bottom: 8px; font-weight: 600;">报警与联动执行项使能 (多选)：</label>
+              <div class="checkbox-group">
+                <label class="checkbox-item">
+                  <input type="checkbox" id="chk-audio-alarm" name="enableAudioAlarm" value="1" checked />
+                  <span>启用浏览器声光蜂鸣警报</span>
+                </label>
+                <label class="checkbox-item">
+                  <input type="checkbox" id="chk-auto-aerator" name="enableAutoAerator" value="1" checked />
+                  <span>低氧时联动曝气泵</span>
+                </label>
+                <label class="checkbox-item">
+                  <input type="checkbox" id="chk-auto-gate" name="enableAutoGate" value="1" checked />
+                  <span>汛期超水位联动开闸</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 表单提交与重置按钮 (Submit & Reset Buttons) -->
+          <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 14px;">
+            <button type="reset" class="btn btn-secondary" id="form-reset-btn">
+              恢复国标推荐默认值
+            </button>
+            <button type="submit" class="btn btn-primary" id="form-submit-btn">
+              验证权限并保存阈值规则
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 物联网历史监测数据记录表 (HTML table规范要求) -->
+      <section id="section-history" class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2>物联网历史监测数据记录表</h2>
+            <h3>时间序列追溯查看、多维水质评估与状态审计记录</h3>
+          </div>
+          <div class="card-actions">
+            <button id="add-snapshot-btn" class="btn btn-sm btn-secondary">保存当前快照</button>
+            <button id="export-csv-btn" class="btn btn-sm btn-primary">导出历史数据 (CSV)</button>
+            <button id="clear-history-btn" class="btn btn-sm btn-danger">清空历史</button>
+          </div>
+        </div>
+
+        <!-- 筛选与搜索工具条 -->
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <label for="filter-status-select" style="font-size: 12px; color: #334155; font-weight: 600;">记录筛选：</label>
+            <select id="filter-status-select" style="width: 140px; height: 32px; font-size: 12px;">
+              <option value="all">全部历史数据</option>
+              <option value="alarm">仅查看超标报警</option>
+              <option value="normal">仅查看正常数据</option>
+            </select>
+          </div>
+
+          <div style="font-size: 12px; color: #64748b;">
+            共计收录 <span id="history-total-count" style="color: #0284c7; font-weight: bold;">0</span> 条采样帧
+          </div>
+        </div>
+
+        <!-- table 表格组件 (Table with Caption, Thead, Tbody, Tfoot) -->
+        <div class="table-wrapper">
+          <table id="history-table">
+            <caption>
+              校园物联网环境监测网络 · 水文水质综合历史监测记录台账 (GB 3838-2002 标准评估)
+            </caption>
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>采样时间</th>
+                <th>监测站点</th>
+                <th>水温 (℃)</th>
+                <th>pH值</th>
+                <th>溶解氧 (mg/L)</th>
+                <th>浊度 (NTU)</th>
+                <th>水位 (m)</th>
+                <th>电导率 (μS/cm)</th>
+                <th>综合评级</th>
+                <th>联动设备工况</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="history-tbody">
+              <!-- 由原生JS动态填充数据行 -->
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3">数据审计汇总说明</td>
+                <td id="tfoot-avg-temp">平均: --</td>
+                <td id="tfoot-avg-ph">平均: --</td>
+                <td id="tfoot-avg-do">平均: --</td>
+                <td id="tfoot-avg-turb">平均: --</td>
+                <td id="tfoot-avg-level">平均: --</td>
+                <td id="tfoot-avg-ec">平均: --</td>
+                <td colspan="3" style="text-align: right; color: #64748b;">
+                  物联网数据实时归档于边缘本地存储
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+      <!-- 监测站点实景与物联硬件相册 (现场实拍照展示与自定义添加插槽) -->
+      <section id="section-gallery" class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2>监测站点实景与物联硬件相册</h2>
+            <h3>原位水质监测浮标、生态水文站实拍及自定义现场图片库</h3>
+          </div>
+          <div class="card-actions">
+            <span style="font-size: 12px; color: #64748b;">支持上传替换现场照片</span>
+          </div>
+        </div>
+
+        <p style="font-size: 12px; color: #475569; margin-bottom: 12px;">
+          以下展示校园内重点水文水质监测节点实地布设环境与现场物联装备。您可以直接在卡片中点击<strong>替换此图</strong>或在右侧插槽<strong>选择本地照片上传</strong>进行即时预览，或在源码中自由修改对应 <code>img src</code> 文件路径。
+        </p>
+
+        <!-- 站点现场实拍网格与图片替换插槽 -->
+        <div class="photo-gallery-grid">
+          <!-- 站点 1: 未名湖中央浮标站实拍 -->
+          <div class="photo-card" id="photo-card-1">
+            <div class="photo-img-wrapper">
+              <span class="photo-badge-overlay">1号站 · 未名湖</span>
+              <!-- 开发者/用户可直接替换下方图片路径 -->
+              <img src="/campus-station-buoy.jpg" alt="1号站 未名湖中央生态站实拍" id="img-station-1" />
+            </div>
+            <div class="photo-card-body">
+              <div>
+                <div class="photo-card-title">1号站 · 湖泊原位水质监测浮标站</div>
+                <div class="photo-card-desc">配置太阳能双供电系统、多参数荧光溶解氧与高精度浊度传感器，浮标实时锚泊于未名湖中央深水区。</div>
+              </div>
+              <div class="photo-card-actions">
+                <span class="badge badge-normal">在网正常</span>
+                <label class="btn btn-sm btn-secondary" style="cursor: pointer; font-size: 11px; margin: 0;">
+                  替换照片
+                  <input type="file" accept="image/*" class="station-photo-input" data-target="img-station-1" style="display: none;" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 站点 2: 临溪水文观测站实拍 -->
+          <div class="photo-card" id="photo-card-3">
+            <div class="photo-img-wrapper">
+              <span class="photo-badge-overlay">3号站 · 临溪渠</span>
+              <!-- 开发者/用户可直接替换下方图片路径 -->
+              <img src="/campus-station-stream.jpg" alt="3号站 临溪明渠水文站实拍" id="img-station-3" />
+            </div>
+            <div class="photo-card-body">
+              <div>
+                <div class="photo-card-title">3号站 · 临溪生态水文监测站</div>
+                <div class="photo-card-desc">立杆式微气象仪、调频雷达非接触式水位计与流速变送器，负责监测校园景观渠动力学演变与防汛引水。</div>
+              </div>
+              <div class="photo-card-actions">
+                <span class="badge badge-normal">在网正常</span>
+                <label class="btn btn-sm btn-secondary" style="cursor: pointer; font-size: 11px; margin: 0;">
+                  替换照片
+                  <input type="file" accept="image/*" class="station-photo-input" data-target="img-station-3" style="display: none;" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 站点 3: 镜湖湿地生态涵养站 -->
+          <div class="photo-card" id="photo-card-2">
+            <div class="photo-img-wrapper">
+              <span class="photo-badge-overlay">2号站 · 镜湖</span>
+              <!-- 开发者/用户可直接替换下方图片路径 -->
+              <img src="/campus-lake-view.svg" alt="2号站 镜湖湿地涵养站" id="img-station-2" />
+            </div>
+            <div class="photo-card-body">
+              <div>
+                <div class="photo-card-title">2号站 · 湿地涵养生态观测区</div>
+                <div class="photo-card-desc">布设浅滩微型水质分析节点，持续监测水体自净生物膜与沉水植物修复区水质生化动态指标。</div>
+              </div>
+              <div class="photo-card-actions">
+                <span class="badge badge-info">生态观测</span>
+                <label class="btn btn-sm btn-secondary" style="cursor: pointer; font-size: 11px; margin: 0;">
+                  替换照片
+                  <input type="file" accept="image/*" class="station-photo-input" data-target="img-station-2" style="display: none;" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 自定义现场照片上传/预留插槽 -->
+          <div class="photo-card" id="photo-card-custom" style="border: 2px dashed #93c5fd; background-color: #f8fafc;">
+            <div class="custom-photo-upload-slot" id="custom-slot-box" style="border: none; min-height: 100%;">
+              <div id="custom-slot-preview" style="display: none; width: 100%; height: 160px; margin-bottom: 12px; overflow: hidden; border-radius: 8px;">
+                <img id="img-custom-preview" src="" alt="自定义站点实拍" style="width: 100%; height: 100%; object-fit: cover;" />
+              </div>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 10px;">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <div style="font-weight: 700; color: #0369a1; font-size: 14px; margin-bottom: 4px;">自定义现场照片插槽</div>
+              <p style="font-size: 12px; color: #64748b; line-height: 1.5; margin-bottom: 14px; max-width: 240px;">
+                点击下方按钮选择您的实景照片，支持 JPG/PNG 格式，即时在系统画廊中展示。
+              </p>
+              <label class="btn btn-sm btn-primary" style="cursor: pointer; font-size: 12px;">
+                选择本地照片上传
+                <input type="file" id="custom-photo-file-input" accept="image/*" style="display: none;" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 系统综合说明、拓扑结构与应急规程 (ol, ul, img, h5, h6 知识点全面展示) -->
+      <section id="section-topology" class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2>物联网立体感知架构与拓扑展示</h2>
+            <h3>硬件拓扑结构图、水系全景及系统标准规范</h3>
+          </div>
+          <div class="card-actions">
+            <a href="#section-top" style="font-size: 12px;">返回顶部</a>
+          </div>
+        </div>
+
+        <!-- 图片展示 (img标签要求) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; margin-bottom: 20px;">
+          <div>
+            <h4 style="margin-bottom: 8px;">感知与控制物理闭环拓扑结构图</h4>
+            <img src="/campus-water-topology.svg" alt="校园水文水质监测拓扑结构图" style="width: 100%; border: 1px solid #e2e8f0;" />
+          </div>
+          <div>
+            <h4 style="margin-bottom: 8px;">校园重点水体监测浮标空间分布图</h4>
+            <img src="/campus-lake-view.svg" alt="校园水体数字化全域孪生系统" style="width: 100%; border: 1px solid #e2e8f0;" />
+          </div>
+        </div>
+
+        <!-- 列表展示：无序列表 (ul) 与 有序列表 (ol) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+          <!-- 无序列表 (ul)：系统核心功能与设备清单 -->
+          <div>
+            <h3 style="margin-bottom: 8px; color: #0284c7;">系统物联网硬件设备清单 (无序列表)</h3>
+            <ul>
+              <li><strong>原位荧光溶解氧变送器：</strong>采用调制蓝光激发，抗硫化物污染，响应速度 &lt; 30s；</li>
+              <li><strong>工业级玻璃电极 pH 计：</strong>复合凝胶电解质，内置温度补偿探头；</li>
+              <li><strong>近红外 90°散射浊度计：</strong>ISO 7027 标准光学滤波，量程 0~100 NTU；</li>
+              <li><strong>调频连续波超声/雷达水位计：</strong>毫米级非接触测距，防浪涌算法；</li>
+              <li><strong>物联网边缘 RTU 终端：</strong>支持 RS-485 Modbus-RTU 汇聚，4G/LoRa 冗余上报。</li>
+            </ul>
+          </div>
+
+          <!-- 有序列表 (ol)：水质超标应急处置标准作业程序 (SOP) -->
+          <div id="section-guide">
+            <h3 style="margin-bottom: 8px; color: #d97706;">异常水质应急处置作业规程 (有序列表 SOP)</h3>
+            <ol>
+              <li><strong>边缘触发自动闭环：</strong>若溶解氧不足或浊度超限，系统自动启闭曝气泵或循环滤水机；</li>
+              <li><strong>声光报警推送通知：</strong>触发 Web 端告警蜂鸣弹窗，并通过云平台短信推送校园后勤保卫处；</li>
+              <li><strong>现场取样便携复测：</strong>水质监测员在 15 分钟内携带便携式水质分析箱至对应站点采水复验；</li>
+              <li><strong>污染源头排查截流：</strong>检查周边实验室生活排污口及雨污分流阀门，杜绝违规直排；</li>
+              <li><strong>复测合格归档总结：</strong>待水质各项指标恢复安全基准线后，系统生成复盘报告并入库归档。</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- <h5>与<h6>级标题声明 -->
+        <div style="margin-top: 20px; padding: 14px; background-color: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd; border-left: 4px solid #0284c7;">
+          <h5>环境监测数据质量合规说明 (h5)</h5>
+          <p style="font-size: 12px; margin-bottom: 4px; color: #475569;">
+            本系统符合《地表水自动监测技术规范》(HJ 915-2017) 与《水文监测数据通信规约》(SL 651-2014) 标准协议。
+          </p>
+          <h6>系统固件版本: Ver 4.2.8-IoT-RELEASE · 实验室认证编码: LAB-CAMPUS-WATER-2026 (h6)</h6>
+        </div>
+      </section>
+    </main>
+
+    <!-- 浮动超限警报模态弹窗 (Fixed Alert Modal) -->
+    <aside id="alert-modal" role="alert">
+      <div class="alert-modal-content">
+        <div class="alert-modal-header">
+          <span class="alert-modal-title">水质水文超限异常警报</span>
+          <button class="alert-close-btn" id="alert-modal-close" title="关闭弹窗">✕</button>
+        </div>
+        <p id="alert-modal-msg" style="color: #dc2626; font-size: 13px; line-height: 1.5; margin: 0;">
+          检测到指标超出预设阈值安全区间，请及时处理！
+        </p>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
+          <button id="alert-action-mute" class="btn btn-sm btn-secondary" style="font-size: 11px;">消音</button>
+          <button id="alert-action-resolve" class="btn btn-sm btn-danger" style="font-size: 11px;">立即处理联动</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 用户身份认证与登录弹窗 (Login Modal Overlay - 仅保留管理员和访客) -->
+    <div id="login-modal-overlay">
+      <div class="login-modal-card" role="dialog" aria-modal="true" aria-labelledby="login-title">
+        <div class="login-header">
+          <div class="login-title-box">
+            <h3 id="login-title" style="color: #0369a1; font-size: 17px; font-weight: 700;">
+              平台用户登录认证
+            </h3>
+            <p style="font-size: 12px; color: #64748b; margin: 0;">
+              系统仅支持管理员与访客角色登录
+            </p>
+          </div>
+          <button id="login-close-btn" class="alert-close-btn" title="关闭">✕</button>
+        </div>
+
+        <!-- 快速测试账号填入快捷栏 (仅留管理员和访客) -->
+        <div style="font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 6px;">
+          快速填入账号：
+        </div>
+        <div class="quick-acc-group">
+          <button type="button" class="quick-acc-btn" id="quick-login-admin">
+            管理员 (admin / 123456)
+          </button>
+          <button type="button" class="quick-acc-btn" id="quick-login-guest">
+            研学访客 (guest / 123456)
+          </button>
+        </div>
+
+        <!-- 登录表单 -->
+        <form id="system-login-form" method="post" action="javascript:void(0);" style="padding: 0; background: transparent; border: none; box-shadow: none;">
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- 账号 -->
+            <div class="form-group">
+              <label for="login-username">登录账号</label>
+              <input type="text" id="login-username" name="username" placeholder="请输入账号 (admin 或 guest)" required autocomplete="username" />
+            </div>
+
+            <!-- 密码 -->
+            <div class="form-group">
+              <label for="login-password">身份校验密码</label>
+              <input type="password" id="login-password" name="password" placeholder="请输入密码 (默认: 123456)" required autocomplete="current-password" />
+            </div>
+
+            <!-- 登录权限角色选择 (只留管理员和访客) -->
+            <div class="form-group">
+              <label for="login-role">认证权限角色</label>
+              <select id="login-role" name="role">
+                <option value="admin">系统超级管理员 (具有设备控制与阈值配置权限)</option>
+                <option value="guest">校园研学访客 (仅供实时数据浏览与图表查看)</option>
+              </select>
+            </div>
+
+            <!-- 图形动态验证码 -->
+            <div class="form-group">
+              <label for="login-captcha">安全验证码 (点击右侧可刷新)</label>
+              <div class="captcha-container">
+                <input type="text" id="login-captcha" name="captcha" placeholder="输入4位验证码" maxlength="4" required style="flex: 1;" />
+                <span id="captcha-display" class="captcha-box" title="点击刷新验证码">8F2K</span>
+              </div>
+            </div>
+
+            <!-- 记住登录状态复选框 -->
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <label class="checkbox-item" style="font-size: 12px; color: #475569;">
+                <input type="checkbox" id="login-remember" name="remember" checked />
+                <span>保持登录状态</span>
+              </label>
+              <a href="javascript:void(0);" id="login-help-link" style="font-size: 12px; color: #0284c7;">
+                查看账号提示
+              </a>
+            </div>
+
+            <!-- 提交按钮 -->
+            <div style="margin-top: 6px;">
+              <button type="submit" class="btn btn-primary" style="width: 100%; padding: 11px; font-size: 14px; font-weight: 700;">
+                立即登录系统
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 底部固定告警横幅 (Fixed Alert Banner) -->
+    <div id="fixed-alarm-banner">
+      <span id="fixed-alarm-text">警告：当前站点检测到指标超标！</span>
+      <div style="display: flex; gap: 10px;">
+        <button id="banner-quick-link" class="btn btn-sm btn-secondary" style="background: rgba(0,0,0,0.4); color: #fff;">查看告警详情</button>
+      </div>
+    </div>
+
+    <!-- 锚点返回顶部浮动按钮 -->
+    <a href="#section-top" class="back-to-top" title="回到顶部">↑</a>
+
+    <!-- 页脚 (Footer) -->
+    <footer>
+      <p>© 2026 智慧绿色校园水文水质智能监测系统 · 物联网技术工程教学示范项目</p>
+      <p style="margin-top: 4px;">
+        严格遵循国家《地表水环境质量标准》(GB 3838-2002) · 
+        <a href="https://www.mee.gov.cn" target="_blank" rel="noopener noreferrer">中华人民共和国生态环境部</a> · 
+        <a href="http://www.mwr.gov.cn" target="_blank" rel="noopener noreferrer">中华人民共和国水利部</a>
+      </p>
+    </footer>
+
+    <!-- 纯原生 JavaScript / TypeScript 逻辑入口 (无任何前端框架) -->
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

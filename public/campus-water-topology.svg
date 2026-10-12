@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0f9ff" />
+      <stop offset="50%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e0f2fe" />
+    </linearGradient>
+    <linearGradient id="cardGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f8fafc" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="360" rx="16" fill="url(#bgLight)" stroke="#cbd5e1" stroke-width="1.5" />
+
+  <!-- Grid decoration lines -->
+  <g stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="4 4" opacity="0.3">
+    <line x1="40" y1="90" x2="860" y2="90" />
+    <line x1="40" y1="180" x2="860" y2="180" />
+    <line x1="40" y1="270" x2="860" y2="270" />
+    <line x1="300" y1="40" x2="300" y2="320" />
+    <line x1="600" y1="40" x2="600" y2="320" />
+  </g>
+
+  <!-- Title Badge in Diagram -->
+  <rect x="260" y="16" width="380" height="36" rx="18" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5" />
+  <text x="450" y="39" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#0369a1" text-anchor="middle">
+    智慧校园物联网水文水质立体感知与闭环控制拓扑
+  </text>
+
+  <!-- SECTION 1: 感知采集层 (Left) -->
+  <rect x="40" y="70" width="230" height="250" rx="12" fill="url(#cardGradLight)" stroke="#0ea5e9" stroke-width="1.5" />
+  <rect x="40" y="70" width="230" height="34" rx="12" fill="#0284c7" />
+  <text x="155" y="92" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#ffffff" text-anchor="middle">
+    1. 感知层 · 原位多参传感器群
+  </text>
+
+  <!-- Sensor Items -->
+  <g transform="translate(56, 120)">
+    <circle cx="12" cy="12" r="10" fill="#0284c7" />
+    <text x="12" y="16" font-family="system-ui" font-size="10" fill="#fff" text-anchor="middle">T</text>
+    <text x="32" y="16" font-family="system-ui" font-size="12" font-weight="600" fill="#1e293b">水温探头 (PT1000)</text>
+
+    <circle cx="12" cy="42" r="10" fill="#10b981" />
+    <text x="12" y="46" font-family="system-ui" font-size="10" fill="#fff" text-anchor="middle">pH</text>
+    <text x="32" y="46" font-family="system-ui" font-size="12" font-weight="600" fill="#1e293b">玻璃复合 pH 计</text>
+
+    <circle cx="12" cy="72" r="10" fill="#06b6d4" />
+    <text x="12" y="76" font-family="system-ui" font-size="9" fill="#fff" text-anchor="middle">DO</text>
+    <text x="32" y="76" font-family="system-ui" font-size="12" font-weight="600" fill="#1e293b">荧光法溶解氧仪</text>
+
+    <circle cx="12" cy="102" r="10" fill="#f59e0b" />
+    <text x="12" y="106" font-family="system-ui" font-size="9" fill="#fff" text-anchor="middle">NTU</text>
+    <text x="32" y="106" font-family="system-ui" font-size="12" font-weight="600" fill="#1e293b">红外散射浊度计</text>
+
+    <circle cx="12" cy="132" r="10" fill="#8b5cf6" />
+    <text x="12" y="136" font-family="system-ui" font-size="10" fill="#fff" text-anchor="middle">H</text>
+    <text x="32" y="136" font-family="system-ui" font-size="12" font-weight="600" fill="#1e293b">雷达/超声波水位计</text>
+
+    <circle cx="12" cy="162" r="10" fill="#ec4899" />
+    <text x="12" y="166" font-family="system-ui" font-size="9" fill="#fff" text-anchor="middle">EC</text>
+    <text x="32" y="166" font-family="system-ui" font-size="12" font-weight="600" fill="#1e293b">电导率/盐度变送器</text>
+  </g>
+
+  <!-- Connectors from Sensors to Gateway -->
+  <path d="M 270 195 L 340 195" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="6 4" />
+  <polygon points="340,195 330,190 330,200" fill="#0284c7" />
+  <text x="305" y="185" font-family="system-ui" font-size="11" font-weight="600" fill="#0369a1" text-anchor="middle">RS485 / Modbus</text>
+
+  <!-- SECTION 2: 边缘计算与网络传输 (Center) -->
+  <rect x="340" y="70" width="220" height="250" rx="12" fill="url(#cardGradLight)" stroke="#6366f1" stroke-width="1.5" />
+  <rect x="340" y="70" width="220" height="34" rx="12" fill="#4f46e5" />
+  <text x="450" y="92" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#ffffff" text-anchor="middle">
+    2. 传输与控制 · 智能网关中心
+  </text>
+
+  <!-- Central Gateway Elements -->
+  <g transform="translate(360, 125)">
+    <rect x="10" y="10" width="160" height="42" rx="8" fill="#eef2ff" stroke="#818cf8" stroke-width="1.2" />
+    <text x="90" y="30" font-family="system-ui" font-size="12" font-weight="700" fill="#3730a3" text-anchor="middle">边缘计算遥测终端 (RTU)</text>
+    <text x="90" y="44" font-family="system-ui" font-size="10" fill="#4f46e5" text-anchor="middle">实时滤波 &amp; 阈值预判决</text>
+
+    <rect x="10" y="70" width="160" height="42" rx="8" fill="#f0f9ff" stroke="#38bdf8" stroke-width="1.2" />
+    <text x="90" y="90" font-family="system-ui" font-size="12" font-weight="700" fill="#0369a1" text-anchor="middle">4G / LoRaWAN 无线专网</text>
+    <text x="90" y="104" font-family="system-ui" font-size="10" fill="#0284c7" text-anchor="middle">双向心跳 · 毫秒级遥控</text>
+
+    <!-- Wave in Center -->
+    <path d="M 30 145 C 50 135, 70 155, 90 145 C 110 135, 130 155, 150 145" stroke="#0ea5e9" stroke-width="3" fill="none" />
+    <path d="M 30 155 C 50 145, 70 165, 90 155 C 110 145, 130 165, 150 155" stroke="#38bdf8" stroke-width="2.5" fill="none" opacity="0.7" />
+    <text x="90" y="178" font-family="system-ui" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">校园绿色水生态物联网</text>
+  </g>
+
+  <!-- Connectors from Gateway to Actuators -->
+  <path d="M 560 195 L 630 195" stroke="#059669" stroke-width="2.5" stroke-dasharray="6 4" />
+  <polygon points="630,195 620,190 620,200" fill="#059669" />
+  <text x="595" y="185" font-family="system-ui" font-size="11" font-weight="600" fill="#047857" text-anchor="middle">继电器控制指令</text>
+
+  <!-- SECTION 3: 治理执行层 (Right) -->
+  <rect x="630" y="70" width="230" height="250" rx="12" fill="url(#cardGradLight)" stroke="#10b981" stroke-width="1.5" />
+  <rect x="630" y="70" width="230" height="34" rx="12" fill="#059669" />
+  <text x="745" y="92" font-family="system-ui, sans-serif" font-size="13" font-weight="bold" fill="#ffffff" text-anchor="middle">
+    3. 执行层 · 智能治理水工装备
+  </text>
+
+  <g transform="translate(646, 120)">
+    <circle cx="12" cy="16" r="10" fill="#059669" />
+    <text x="12" y="20" font-family="system-ui" font-size="11" fill="#fff" text-anchor="middle">⚙</text>
+    <text x="32" y="16" font-family="system-ui" font-size="12" font-weight="700" fill="#1e293b">增氧微孔曝气机</text>
+    <text x="32" y="30" font-family="system-ui" font-size="10" fill="#64748b">DO不足自动充氧供生境</text>
+
+    <circle cx="12" cy="60" r="10" fill="#0284c7" />
+    <text x="12" y="64" font-family="system-ui" font-size="11" fill="#fff" text-anchor="middle">💧</text>
+    <text x="32" y="60" font-family="system-ui" font-size="12" font-weight="700" fill="#1e293b">生态循环砂滤水泵</text>
+    <text x="32" y="74" font-family="system-ui" font-size="10" fill="#64748b">高浊度时启动自净沉淀</text>
+
+    <circle cx="12" cy="104" r="10" fill="#d97706" />
+    <text x="12" y="108" font-family="system-ui" font-size="11" fill="#fff" text-anchor="middle">🧪</text>
+    <text x="32" y="104" font-family="system-ui" font-size="12" font-weight="700" fill="#1e293b">中和药剂自动加药泵</text>
+    <text x="32" y="118" font-family="system-ui" font-size="10" fill="#64748b">酸碱度失衡自动微调</text>
+
+    <circle cx="12" cy="148" r="10" fill="#7c3aed" />
+    <text x="12" y="152" font-family="system-ui" font-size="11" fill="#fff" text-anchor="middle">⛩</text>
+    <text x="32" y="148" font-family="system-ui" font-size="12" font-weight="700" fill="#1e293b">智能防汛液压升降闸</text>
+    <text x="32" y="162" font-family="system-ui" font-size="10" fill="#64748b">汛期超水位自动启闭泄洪</text>
+  </g>
+</svg>

@@ -1,0 +1,6 @@
+{
+  "name": "校园水文水质智能监测系统",
+  "description": "基于物联网传感器与自动化控制的智慧校园水文水质实时监测与预警分析平台，支持多监测站数据看板、水质趋势图表分析、双模智能设备联动控制、历史记录追溯及超限异常报警。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
